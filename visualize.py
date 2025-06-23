@@ -1,33 +1,67 @@
 import json
 import cv2
-from pathlib import Path
+import os
+from utils.video_utils import extract_frames, draw_boxes, save_video
 
-def draw_boxes(video_path, mapping_path, view, save_path):
-    with open(mapping_path, "r") as f:
-        mappings = json.load(f)
 
-    cap = cv2.VideoCapture(video_path)
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(save_path, fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
-    frame_idx = 0
+def visualize(video_path, detection_path, output_path, use_mapping=True):
+    frames = extract_frames(video_path)
+    with open(detection_path, 'r') as f:
+        data = json.load(f)
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+    annotated = []
+    for idx, frame in enumerate(frames):
+        key = f"frame_{idx}"
+        if key not in data:
+            annotated.append(frame)
+            continue
 
-        frame_key = f"frame_{frame_idx}"
-        if frame_key in mappings[view]:
-            for pid, bbox in mappings[view][frame_key].items():
-                x1, y1, x2, y2 = map(int, bbox)
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(frame, pid, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
+        if use_mapping:
+            boxes = list(data[key].values())
+            ids = list(data[key].keys())
+        else:
+            boxes = [obj["bbox"] for obj in data[key]]
+            ids = [str(i) for i in range(len(boxes))]
 
-        out.write(frame)
-        frame_idx += 1
+        annotated_frame = draw_boxes(frame, boxes, ids)
+        annotated.append(annotated_frame)
 
-    cap.release()
-    out.release()
+    save_video(annotated, output_path)
 
-draw_boxes("videos/broadcast.mp4", "outputs/mappings.json", "broadcast", "outputs/visualized/broadcast_annotated.mp4")
-draw_boxes("videos/tacticam.mp4", "outputs/mappings.json", "tacticam", "outputs/visualized/tacticam_annotated.mp4")
+
+if __name__ == "__main__":
+    output_dir = "outputs/visualized"
+    os.makedirs(output_dir, exist_ok=True)
+    print(f"Created output directory: {output_dir}")
+
+    # Check if input files exist
+    input_files = {
+        "broadcast": "videos/broadcast.mp4",  # Changed from data/ to videos/
+        "tacticam": "videos/tacticam.mp4",    # Changed from data/ to videos/
+        "mappings": "outputs/mappings.json"
+    }
+
+    for name, path in input_files.items():
+        if not os.path.exists(path):
+            print(f"Error: {name} file not found at {path}")
+            exit(1)
+
+    # Visualize mapping results
+    try:
+        with open("outputs/mappings.json") as f:
+            mapping = json.load(f)
+            print("Successfully loaded mappings.json")
+    except Exception as e:
+        print(f"Error loading mappings.json: {str(e)}")
+        exit(1)
+
+    visualize("videos/broadcast.mp4", "outputs/mappings.json",  # Changed path
+             f"{output_dir}/broadcast_annotated.mp4", use_mapping=True)
+    visualize("videos/tacticam.mp4", "outputs/mappings.json",   # Changed path
+             f"{output_dir}/tacticam_annotated.mp4", use_mapping=True)
+
+    # OPTIONAL: Visualize detections only
+    visualize("videos/broadcast.mp4", "data/broadcast_detections.json",   # Changed path
+             "outputs/visualized/broadcast_detections_only.mp4", use_mapping=False)
+    visualize("videos/tacticam.mp4", "data/tacticam_detections.json",    # Changed path
+             "outputs/visualized/tacticam_detections_only.mp4", use_mapping=False)
