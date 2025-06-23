@@ -59,7 +59,3 @@
    - More storage for video processing
    - Higher RAM for batch processing
 
-2. **Development Time**
-   - Feature extraction optimization: 2 weeks
-   - UI development: 3 weeks
-   - Testing and validation: 2 weeks
