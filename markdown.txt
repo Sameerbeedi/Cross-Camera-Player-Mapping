@@ -1,0 +1,65 @@
+# Player Detection and Cross-Camera Tracking Project Report
+
+## Approach and Methodology
+
+1. **Multi-Stage Pipeline**
+   - YOLO-based player detection
+   - Visual feature extraction
+   - Cross-camera player matching
+   - Result visualization
+
+2. **Technology Stack**
+   - Python with OpenCV for video processing
+   - YOLOv11 for object detection
+   - PyTorch for deep learning features
+
+## Techniques and Outcomes
+
+1. **Player Detection**
+   - Used fine-tuned YOLOv11 model
+   - Successfully detects players in both broadcast and tactical views
+   - Output stored as JSON with bounding box coordinates
+
+2. **Feature Extraction**
+   - Extracted visual features from player patches
+   - Used position and appearance information
+
+3. **Cross-Camera Matching**
+   - Implemented player ID mapping between views
+   - Maintained consistent IDs across camera switches
+
+## Challenges Encountered
+
+1. **Technical Challenges**
+   - Occlusion handling in crowded scenes
+   - Real-time processing requirements
+   - Varying camera angles and perspectives
+
+2. **Implementation Issues**
+   - Model deployment size constraints
+   - Video processing memory usage
+   - Synchronization between camera feeds
+
+## Future Work
+
+1. **Improvements Needed**
+   - Real-time processing optimization
+   - Better handling of player occlusions
+   - Enhanced feature matching algorithms
+
+2. **Next Steps**
+   - Implement player trajectory prediction
+   - Add team identification
+   - Develop web interface for visualization
+
+## Resource Requirements
+
+1. **Computing Resources**
+   - GPU for faster model inference
+   - More storage for video processing
+   - Higher RAM for batch processing
+
+2. **Development Time**
+   - Feature extraction optimization: 2 weeks
+   - UI development: 3 weeks
+   - Testing and validation: 2 weeks
